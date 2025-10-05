@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartAttend Pro - Attendance Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📘</span>
+                    <span class="logo-text">SmartAttend Pro</span>
+                </div>
+                <div class="user-section">
+                    <span class="user-email" id="userEmail">📧 sharmaanshul0244@gmail.com</span>
+                    <button class="btn-signout" onclick="signOut()">🔒 Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav-section">
+        <div class="container">
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showSection('mark-attendance')">
+                    ✅ Mark Attendance
+                </button>
+                <button class="nav-btn" onclick="showSection('view-reports')">
+                    📊 View Reports
+                </button>
+                <button class="nav-btn" onclick="showSection('add-student')">
+                    👨‍🎓 Add Student
+                </button>
+                <button class="nav-btn" onclick="showSection('manage-classes')">
+                    🏫 Manage Classes
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            
+            <!-- Manage Classes Section -->
+            <section id="manage-classes-section" class="content-section active">
+                <div class="two-column-layout">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>🏫 Classes</h2>
+                            <button class="btn-primary" onclick="showAddClassModal()">+ Add Class</button>
+                        </div>
+                        <div id="classList" class="list-container">
+                            <!-- Classes will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>🕐 Periods</h2>
+                            <button class="btn-success" onclick="showAddPeriodModal()">+ Add Period</button>
+                        </div>
+                        <div id="periodsList" class="empty-state">
+                            <div class="empty-icon">🕐</div>
+                            <h3>Select a class to view periods</h3>
+                            <p>Click "View Periods" on a class to see its periods</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Student Section -->
+            <section id="add-student-section" class="content-section">
+                <div class="center-card">
+                    <div class="form-card">
+                        <div class="form-icon">👨‍🎓</div>
+                        <h2>Add New Student</h2>
+                        <p class="subtitle">Add a new student to the attendance system</p>
+                        
+                        <form id="addStudentForm" onsubmit="addStudent(event)">
+                            <div class="form-group">
+                                <label>📋 Student ID: *</label>
+                                <input type="text" id="studentId" placeholder="e.g., S001, STU123" required>
+                                <small>Must be unique. Use format like S001, STU123, etc.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>👤 Student Name: *</label>
+                                <input type="text" id="studentName" placeholder="e.g., John Smith" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>🏫 Class: *</label>
+                                <select id="studentClass" required>
+                                    <option value="">Choose a class...</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-submit">+ Add Student</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- View Reports Section -->
+            <section id="view-reports-section" class="content-section">
+                <div class="card">
+                    <h2>📊 Attendance Reports</h2>
+                    
+                    <div class="report-filters">
+                        <div class="filter-group">
+                            <label>🏫 Select Class:</label>
+                            <select id="reportClass" onchange="loadReportStudents()">
+                                <option value="">Choose a class...</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>📅 Select Month:</label>
+                            <input type="month" id="reportMonth" value="">
+                        </div>
+
+                        <button class="btn-success" onclick="downloadCSV()">💾 Download CSV</button>
+                    </div>
+
+                    <div id="reportContainer" class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <h3>Generate Attendance Report</h3>
+                        <p>Please select a class and month from the dropdowns above to generate a detailed attendance report.</p>
+                    </div>
+
+                    <div id="reportTable" style="display: none;">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Total Days</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                    <th>Attendance %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mark Attendance Section -->
+            <section id="mark-attendance-section" class="content-section">
+                <div class="card">
+                    <h2>📝 Mark Attendance</h2>
+                    
+                    <div class="attendance-filters">
+                        <div class="filter-group">
+                            <label>🏫 Select Class:</label>
+                            <select id="attendanceClass" onchange="loadPeriods()">
+                                <option value="">Choose a class...</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>🕐 Select Period:</label>
+                            <select id="attendancePeriod" onchange="loadStudentsForAttendance()" disabled>
+                                <option value="">Select a class first...</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>📅 Date:</label>
+                            <input type="date" id="attendanceDate" value="">
+                        </div>
+                    </div>
+
+                    <div id="attendanceContainer" class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <h3>Select Class and Period</h3>
+                        <p>Please select a class and period from the dropdowns above to start marking attendance.</p>
+                    </div>
+
+                    <div id="attendanceList" style="display: none;">
+                        <div class="attendance-actions">
+                            <button class="btn-primary" onclick="markAllPresent()">✅ Mark All Present</button>
+                            <button class="btn-danger" onclick="markAllAbsent()">❌ Mark All Absent</button>
+                        </div>
+                        <div id="studentAttendanceList"></div>
+                        <button class="btn-submit" onclick="saveAttendance()">💾 Save Attendance</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Add Class Modal -->
+    <div id="addClassModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addClassModal')">&times;</span>
+            <h2>Add New Class</h2>
+            <form onsubmit="addClass(event)">
+                <div class="form-group">
+                    <label>Class Name: *</label>
+                    <input type="text" id="className" placeholder="e.g., Class 10-A, Grade 5" required>
+                </div>
+                <div class="form-group">
+                    <label>Academic Year: *</label>
+                    <input type="text" id="academicYear" placeholder="e.g., 2024-25" required>
+                </div>
+                <div class="form-group">
+                    <label>Teacher Name:</label>
+                    <input type="text" id="teacherName" placeholder="e.g., Mrs. Sharma">
+                </div>
+                <button type="submit" class="btn-submit">Add Class</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Period Modal -->
+    <div id="addPeriodModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addPeriodModal')">&times;</span>
+            <h2>Add New Period</h2>
+            <form onsubmit="addPeriod(event)">
+                <div class="form-group">
+                    <label>Period Name: *</label>
+                    <input type="text" id="periodName" placeholder="e.g., Period 1, Morning" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Time: *</label>
+                    <input type="time" id="startTime" required>
+                </div>
+                <div class="form-group">
+                    <label>End Time: *</label>
+                    <input type="time" id="endTime" required>
+                </div>
+                <button type="submit" class="btn-submit">Add Period</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
